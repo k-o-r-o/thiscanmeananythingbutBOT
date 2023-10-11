@@ -1,1 +1,0 @@
-//this is the file the bot logs to when scraping a channel

@@ -1,10 +1,11 @@
 const fs = require('fs');
+const { MessageAttachment } = require('discord.js');
 
-module.exports = { copyMessages };
+module.exports = { copyAllMessages };
 
-async function copyMessages(client, message) {
+async function copyAllMessages(client, message) {
     try {
-        console.log(`copyMessages called by user: ${message.author.username}`);
+        console.log(`copyAllMessages called by user: ${message.author.username}`);
 
         const copiedMessages = [];
         let lastMessageId = null;
@@ -24,8 +25,18 @@ async function copyMessages(client, message) {
                 // Check if the message has a ✅ reaction
                 const hasCheckMark = msg.reactions.cache.has('✅');
 
-                // Get the message content
-                const messageContent = hasCheckMark ? `${msg.content} ✅` : msg.content;
+                // Add a ✅ to the end of the message if it has the reaction
+                let messageContent = hasCheckMark ? `${msg.content} ✅` : msg.content;
+
+                // Check for attachments (images)
+                if (msg.attachments.size > 0) {
+                    for (const attachment of msg.attachments.values()) {
+                        // Handle image attachments
+                        if (attachment.url) {
+                            messageContent += `\n${attachment.url}`;
+                        }
+                    }
+                }
 
                 copiedMessages.push(messageContent);
 
@@ -38,7 +49,7 @@ async function copyMessages(client, message) {
         copiedMessages.reverse();
 
         // Write the modified messages to the 'copy.txt' file
-        fs.writeFileSync('copy.txt', copiedMessages.join('\n'));
+        fs.writeFileSync('copy.txt', copiedMessages.join('\n\n'), { encoding: 'utf-8' });
         console.log(`Copied messages successfully to copy.txt.`);
     } catch (error) {
         console.error('An error occurred while copying messages:', error);

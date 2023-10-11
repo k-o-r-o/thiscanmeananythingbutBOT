@@ -18,10 +18,13 @@ const client = new Client({
 // Import your command handling functions
 const { playRPS } = require('./games/rps.js');
 const { bagMe } = require('./bagme.js');
-const { copyPastMessages } = require('./copy.js');
+const { copyMessages } = require('./copy.js');
 const { ping } = require('./games/ping.js');
 const { handleTempAlerts } = require('./tempalerts.js');
 const { welcomeNewMember } = require('./welcome.js');
+const { pasteCopiedMessages } = require('./paste.js');
+const { copyAllMessages } = require('./copyimg.js');
+
 
 client.on('ready', () => {
     console.log(`😈 ${client.user.tag} is online!`);
@@ -36,19 +39,27 @@ client.on('messageCreate', async (message) => {
         ping(message);
     }
     try {
-        // Check if the message is in the 'bots' channel
-        if (message.channel.name === 'bots') {
-            // Check for different commands based on message content
-            if (message.content === '~play rps') {
-                playRPS(client, message);
-            } else if (message.content.startsWith('~copy')) {
-                copyPastMessages(client, message); // Call the copyMessages function
-            }
-            else if (message.content.startsWith('~add temp')) {
-                handleTempAlerts(message);
-            }
-            // You can add more command checks here
+        // Remove the channel name check so that the command can be used in any channel
+        if (message.content.startsWith('~test')) {
+            message.channel.send(`stfu it works, ${message.author.username}`);
         }
+        
+        // Check for different commands based on message content
+        if (message.content === '~play rps') {
+            playRPS(client, message);
+        } else if (message.content.startsWith('~copy')) {
+            copyMessages(client, message);
+        }
+        else if (message.content.startsWith('~paste')) {
+            pasteCopiedMessages(client, message);
+        }
+        else if (message.content.startsWith('~add temp')) {
+            handleTempAlerts(message);
+        }
+        else if (message.content.startsWith('~imgcopy')) {
+            copyAllMessages(client, message);
+        }
+        // You can add more command checks here
     } catch (error) {
         console.error('An error occurred:', error);
     }
@@ -78,9 +89,10 @@ client.on('guildMemberAdd', (member) => {
 
 
 //use my token in src/.env
-client.login(process.env.TOKEN);
+client.login(TOKEN='token');
 
 
 function randomNum() {
     Num = Math.floor(Math.random() * 3) + 1;
 }
+
